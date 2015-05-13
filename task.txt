@@ -1,0 +1,103 @@
+串口下发协议：
+1.相机通过串行485接口形成相机网络通讯系统。
+2.单台相机可以通过以太网接口设定本相机与485网络中的其它相机的属相与工作状态。
+3.485网络中的相机有前后之分，前后相机个数是相等的，其地址一一对应。
+4.地址计数从1开始，相机地址计数从左到右依次增加，地址数值小于截止通道数的前后相机都属于一次通道，地址数值大于截止通道数的前后相机都属于二次通道。
+
+
+所设定的内容如下：
+相机地址、主从、前后。
+广播前相机的剔除位置。
+广播后相机的剔除位置。
+广播开始工作。
+广播停止工作。
+广播一次通道异色精度。
+广播二次通道异色精度。
+
+广播一次通道病斑精度。
+广播二次通道病斑精度。
+
+广播主相机的RGB平场均值。
+广播所有相机的工作训练参数。
+
+烧写所有相机工作训练参数。
+擦除所有相机工作训练参数。
+
+工作参数结构体如下：
+#define	GMM_MODELNUM_MAX		10
+
+typedef struct ObjectThd{
+	Uint32 HMaxValue[GMM_MODELNUM_MAX];
+	Uint32 HMinValue[GMM_MODELNUM_MAX];
+	Uint32 SMaxValue[GMM_MODELNUM_MAX];
+	Uint32 SMinValue[GMM_MODELNUM_MAX];
+	Uint32 VMaxValue[GMM_MODELNUM_MAX];
+	Uint32 VMinValue[GMM_MODELNUM_MAX];	
+}ObjectThd;
+
+typedef struct RiceAlgPara{
+	Uint32 nBurnFlag;			    // 烧写配置标志
+	char sStructVer[32];			// 结构体版本号
+	char sBurnStatus[32];			// 固化信息状态	
+	ObjectThd strObjectThd;
+	int pModelNum;	
+	int defect_threshold;	
+	int mixm_bg;//=2
+	double sigma_scale_bg;//>=2.5, <=3.5
+	int mixm_fg;//<9
+	double sigma_scale_fg;//>=2.5, <=3.5
+	int train_obj_num;	//
+}RiceAlgPara
+
+
+
+
+1. 首先在cam_common.h 中定义结构体
+
+//串口信息
+typedef struct tagUartAddrInf
+{
+	Uint32 nBurnFlag; --  烧写标记
+	Uint32 nIndex;	-- 本相机的编号
+	Uint32 nNumOfGroup; -- 每个通道的相机数目
+}UartIdxInf;
+
+2. 添加网络协议令牌 cam_common.h 中
+#define WRITE_UART_CFG_INFO		???
+
+3. Cam_net.c 中添加网络接受串口配置信息的解析
+
+switch(protocal)
+{
+	case WRITE_UART_CFG_INFO:
+		....
+		将解析的放到 flash 中
+}
+
+4.  在Cam_common.c 中定义 UartIdxInf g_strUartIdxInf
+初始化的时候需要从 Flash 中读出这个信息存放到 g_strUartIdxInf 中
+
+5.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
